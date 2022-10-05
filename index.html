@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempo</title>
+    <script src="https://momentjs.com/downloads/moment.js"></script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            align-items: flex-end;
+        }
+        #container {
+            display: flex;
+            position: relative;
+            font-family: monospace;
+            height: 25vh;
+            width: 100%;
+            background-color: rgb(209, 209, 209);
+            font-size: 24vh;
+            transition: all 2s ease-out;
+        }
+
+        #container.danger {
+            height: 50vh;
+            font-size: 33vh;
+        }
+
+
+
+        #timer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgb(43, 189, 62);
+            transition: all 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
+        }
+
+        .danger #timer {
+            background-color: red;
+
+        }
+
+        .warning #timer {
+            background-color: yellow;
+            border-top: 10px solid rgb(207, 207, 0);
+        }
+
+        .danger #text {
+            color: white;
+            font-weight: bold;
+        }
+
+        #text {
+            position: absolute;
+            top: 50%; right: 50%;
+            transform: translate(50%,-50%);
+            font-weight: bold;
+            color: white;
+            text-shadow: 0px 3px 10px rgb(0 0 0 / 50%);
+        }
+
+        #timer.blink {
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0% {
+                color: red;
+            }
+
+            50% {
+                color: white;
+            }
+
+            100% {
+                color: red;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="text"></div>
+        <div id="timer"></div>
+    </div>
+
+    <script>
+        let params = (new URL(document.location)).searchParams;
+        let startTime = params.get("start");
+        let targetTime = params.get("end");
+        let timer = document.getElementById('timer')
+
+        function updateTimer(startTime, targetTime) {
+            var startDate = moment(startTime, 'hh:mm')
+            var targetDate = moment(targetTime, 'hh:mm')
+            var now = moment()
+
+            var total = targetDate.diff(startDate) / 1000
+            var remaining = targetDate.diff(now) / 1000
+            var elapsed = now.diff(startDate) / 1000
+
+            console.log(remaining)
+            console.log(elapsed)
+
+            var width = elapsed * 100 / total
+
+            document.getElementById('timer').style.width = width  + "%"
+            
+
+            if (remaining < 120 && remaining > 0) {
+                document.getElementById('container').classList.add('warning')
+            }
+
+            if (remaining < 0) {
+                document.getElementById('text').innerText = "+" + new Date(-remaining * 1000).toISOString().substr(11, 8);
+                document.getElementById('container').classList.add('danger')
+                document.getElementById('container').classList.remove('warning')
+            } else {
+                if (elapsed > 0) {
+                    document.getElementById('text').innerText = new Date(targetDate.diff(now)).toISOString().substr(11, 8);
+                } else {
+                    document.getElementById('text').innerText = "-" +new Date(-elapsed * 1000).toISOString().substr(11, 8);
+
+                }
+            }
+
+            if (remaining < -120) {
+                document.getElementById('container').classList.add('blink')
+            }
+
+
+
+        }
+
+        setInterval( ()=> updateTimer(startTime, targetTime), 1000)
+
+
+
+
+
+    </script>
+</body>
+</html>
